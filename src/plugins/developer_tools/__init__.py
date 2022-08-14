@@ -1,17 +1,24 @@
-import os, sys, psutil, nonebot, time
+import os
+import sys
+import psutil
+import nonebot
+import time
 from nonebot import on_command
 from nonebot.adapters import Message
 from nonebot.params import CommandArg
+from nonebot.adapters.onebot.v11 import Message, MessageSegment, unescape, Event, Bot, GroupMessageEvent
 from typing import List
-from .example import status
+from pathlib import Path
+from functools import reduce
 TOOLS = nonebot.get_driver().config.tools_path
 sys.path.append(str(TOOLS))
+CACHE = TOOLS[:-5] + "cache"
 from permission import checker, error
 from file import read, write
 from config import Config
-from http_ import http
-from functools import reduce
-from nonebot.adapters.onebot.v11 import Message, MessageSegment, unescape, Event, Bot
+from utils import get_url, get_status
+from gender import gender
+from .example import *
 
 helpimg = on_command("helpimg", aliases={"hi"}, priority=5)
 
@@ -35,7 +42,7 @@ imgsize = on_command("imgsize",aliases={"is"},priority=5)
 @imgsize.handle()
 async def __(bot: Bot, event: Event):
     if checker(str(event.user_id),9) == False:
-        await bot.finish(error(9))
+        await imgsize.finish(error(9))
     size = read(Config.size)
     await imgsize.finish("查到啦！当前图片尺寸为"+size+"。")
 purge = on_command("purge",priority=5)
@@ -44,26 +51,23 @@ purge = on_command("purge",priority=5)
 async def ___(event: Event):
     if checker(str(event.user_id),1) == False:
         await purge.finish(error(1))
-    if Config.platform == True:
-        os.system(f"rm -rf {Config.help_image_save_to}")
-        os.system(f"rm -rf {Config.html_path}")
+    try:
+        for i in os.listdir(CACHE):
+            os.remove(CACHE+"/"+i)
+    except:
+        await purge.finish("部分文件并没有找到哦~")
     else:
-        os.system(f"rd /s /q {Config.help_image_save_to}")
-        os.system(f"rd /s /q {Config.html_path}")
-    await purge.finish("好的，已帮你清除图片缓存~")
+        await purge.finish("好的，已帮你清除图片缓存~")
 
 shutdown = on_command("shutdown",aliases={"poweroff"},priority=5)
 
 @shutdown.handle()
 async def ____(event: Event):
     if checker(str(event.user_id),10) == False:
-        await shutdown.error(10)
+        await shutdown.finish(error(10))
     await shutdown.send("请稍候，正在关闭中……")
     await shutdown.send("关闭成功！请联系Owner到后台手动开启哦~")
-    if Config.platform:
-        os.system("killall nb")
-    else:
-        os.system("taskkill /f /t /im nb.exe")
+    sys.exit(0)
 
 restart = on_command("restart",priority=5)
 @restart.handle()
@@ -94,14 +98,15 @@ async def say_(event: Event, args: Message = CommandArg()):
 ping = on_command("ping", aliases={"测试"}, priority=5)
 @ping.handle()
 async def _(event: Event):
-    if checker(str(event.user_id), 1) == False:
-        times = str("现在是" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f"\n当前版本v{Config.version}(Nonebot {Config.nonebot})")
+    ikv = await Config.version()
+    if checker(str(event.user_id),1) == False:
+        times = str("现在是" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f"\n当前版本{ikv}\n(Nonebot {Config.nonebot})")
         await ping.finish(times)
     def per_cpu_status() -> List[float]:
         return psutil.cpu_percent(interval=1, percpu=True)
     def memory_status() -> float:
         return psutil.virtual_memory().percent
-    times = str("现在是" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f"\n当前版本v{Config.version}(Nonebot {Config.nonebot})")
+    times = str("现在是" + time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) + f"\n当前版本{ikv}\n(Nonebot {Config.nonebot})")
     msg = f"来啦！\n系统信息如下：\nCPU占用：{str(per_cpu_status()[0])}%\n内存占用：{str(memory_status())}%\n"
     await ping.finish(msg + times)
 back = on_command("back", priority=5)
@@ -135,7 +140,7 @@ async def _(event: Event, args: Message = CommandArg()):
     if checker(str(event.user_id),10) == False:
         await call_api.finish(error(10))
     cmd = args.extract_plain_text()
-    await http.get_url(f"{Config.cqhttp}{cmd}")
+    await get_url(f"{Config.cqhttp}{cmd}")
 
 git = on_command("git",priority=5)
 @git.handle()
@@ -154,3 +159,24 @@ async def _(event: Event, args: Message = CommandArg()):
     if msg == "":
         msg = "执行完成，但没有输出哦~"
     await git.finish(msg)
+
+voice = on_command("voice", priority=5)
+@voice.handle()
+async def _(bot: Bot, event: GroupMessageEvent, args: Message = CommandArg()):
+    if checker(str(event.user_id),10) == False:
+        await call_api.finish(error(10))
+    sth = args.extract_plain_text()
+    final_msg = f"[CQ:tts,text={sth}]"
+    await bot.call_api("send_group_msg",group_id=event.group_id,message=final_msg)
+    
+web = on_command("web",priority=5)
+@web.handle()
+async def _(bot: Bot, event: GroupMessageEvent, args: Message = CommandArg()):
+    if checker(str(event.user_id),10) == False:
+        await call_api.finish(error(10))
+    url = args.extract_plain_text()
+    if await get_status(url) not in [200,301,302]:
+        await web.finish("唔……网站图片获取失败。\n原因：响应码非200，请检查是否能正常访问。")
+    else:
+        image = gender(url,2,"1366x768",True)
+        await web.finish("获取图片成功！\n"+MessageSegment.image(Path(image).as_uri()))

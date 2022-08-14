@@ -1,4 +1,7 @@
-import json,sys,nonebot,os
+import json
+import sys
+import nonebot
+import os
 from nonebot import get_bot, on_command
 from nonebot.adapters import Message
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent
@@ -6,11 +9,11 @@ from nonebot.adapters.onebot.v11 import MessageSegment as ms
 from nonebot.log import logger
 from nonebot.params import CommandArg
 TOOLS = nonebot.get_driver().config.tools_path
-DATA = TOOLS[:TOOLS.find("/tools")]+"/data"
+DATA = TOOLS[:-5] + "data"
 sys.path.append(str(TOOLS))
 from permission import checker, error
-from http_ import http
-from file import read, write
+from utils import get_status
+from file import read
 from config import Config
 
 def already(reponame: str, group) -> bool:
@@ -24,7 +27,7 @@ repo = on_command("repo", priority=5)
 @repo.handle()
 async def _(event: GroupMessageEvent, args: Message = CommandArg()):
     reponame = args.extract_plain_text()
-    status_code = await http.get_status("https://github.com/"+reponame)
+    status_code = await get_status("https://github.com/"+reponame)
     if status_code != 200:
         await repo.finish(f"仓库获取失败，请检查后重试哦~\n错误码：{status_code}")
     else:
@@ -36,7 +39,7 @@ async def _(event: GroupMessageEvent, args: Message = CommandArg()):
     if checker(str(event.user_id),9) == False:
         await unbind.finish(error(9))
     repo_name = args.extract_plain_text()
-    status_code = await http.get_status("https://github.com/"+repo_name)
+    status_code = await get_status("https://github.com/"+repo_name)
     if status_code != 200:
         await repo.finish(f"唔……绑定失败。\n错误码：{status_code}")
     else:
@@ -102,12 +105,9 @@ async def sendm(bot: Bot, message, repo):
         try:
             response = await bot.call_api("send_group_msg", group_id=int(i), message=message)
             logger.info("Webhook推送成功：消息ID为"+str(response["message_id"]))
-            return
         except:
             try:
                 response = await bot.call_api("send_group_msg", group_id=int(group), message="唔……刚刚发送消息失败了哦（原因懂的都懂），重新发送：\n"+message)
                 logger.info("Webhook推送失败：被风控，重新发送消息ID为"+response["message_id"])
-                return
             except:
                 logger.info("Webhook推送失败：被风控，重新发送失败。")
-                return

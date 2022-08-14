@@ -1,4 +1,6 @@
-import json, sys, nonebot
+import json
+import sys
+import nonebot
 from nonebot import on_command
 from nonebot.adapters import Message
 from nonebot.adapters.onebot.v11 import Event
@@ -8,10 +10,9 @@ sys.path.append(str(TOOLS))
 from permission import checker, error
 from file import write, read
 from config import Config
+from utils import checknumber
 
-op = on_command("op", aliases={"admin", "setadmin"}, priority=5)
-def checknumber(number):
-    number.isdecimal()
+op = on_command("setop", aliases={"admin", "setadmin"}, priority=5)
 @op.handle()
 async def handle_first_receive(event: Event, args: Message = CommandArg()):
     if checker(str(event.user_id), 10) == False:
@@ -34,7 +35,7 @@ async def handle_first_receive(event: Event, args: Message = CommandArg()):
             if arguments[1] not in ["0","1","2","3","4","5","6","7","8","9","10"]:
                 await op.finish("你这设置的什么鬼权限啊？！")
             if arguments[1] == "10":
-                await op.finish("这么高的权限还是请后台修改吧（")
+                await op.finish("这么高的权限还是请后台修改吧。")
             if arguments[0] in adminlist:
                 if arguments[1] == "0":
                     adminlist.pop(arguments[0])

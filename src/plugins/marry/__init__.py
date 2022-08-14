@@ -1,4 +1,5 @@
-import json, sys
+import json
+import sys
 import nonebot
 from nonebot.adapters.onebot.v11 import MessageSegment as ms
 from nonebot import on_command
@@ -7,7 +8,7 @@ from nonebot.adapters.onebot.v11 import GroupMessageEvent
 from nonebot.params import CommandArg
 from .marry import already_married
 TOOLS = nonebot.get_driver().config.tools_path
-DATA = TOOLS[:TOOLS.find("/tools")]+"/data"
+DATA = TOOLS[:-5] + "data"
 sys.path.append(str(TOOLS))
 from file import read, write
 
@@ -23,9 +24,7 @@ async def _(event: GroupMessageEvent, args: Message = CommandArg()):
     group = str(event.group_id)
     if husband == wife:
         await get_married.finish("诶？不能自娱自乐啊！")
-    if checknumber(wife) == True or wife == "3438531564":
-        pass
-    else:
+    if checknumber(wife) == False or wife == "3438531564":
         await get_married.finish("你在跟谁求婚啊喂？！")
     if already_married(husband,group):
         await get_married.finish("你已经求过婚了哦，不能再要了。")

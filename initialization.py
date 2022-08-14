@@ -5,6 +5,24 @@ try:
     os.mkdir("./src/data")
 except FileExistsError:
     print("检测到`data`文件夹已创建。")
+try:
+    os.mkdir("./src/cache")
+except FileExistsError:
+    print("检测到`cache`文件夹已创建。")
+try:
+    os.mkdir("./src/assets")
+    os.mkdir("./src/assets/arcaea")
+    os.mkdir("./src/assets/arcaea/char")
+    os.mkdir("./src/assets/arcaea/icon")
+    os.mkdir("./src/assets/arcaea/song")
+    os.mkdir("./src/assets/jx3")
+    os.mkdir("./src/assets/jx3/skills")
+    os.mkdir("./src/assets/jx3/icons")
+    os.mkdir("./src/assets/jx3/maps")
+    os.mkdir("./src/assets/jx3/achievement")
+    os.mkdir("./src/assets/jx3/talents")
+except FileExistsError:
+    print("检测到`assets`文件夹已创建，已自动补全所有需要的文件夹。")
 def write(file, something):
     with open(f"./src/tools/{file}",mode="w") as cache:
         cache.write(something)
@@ -27,25 +45,49 @@ if __name__ == "__main__":
     space()
     print("模块`developer_tools`需要使用`platform`的值，请输入0或任意字符串，0代表`Bot`运行在`Windows`上，`任意字符串`则代表运行在`Linux`（最好是`Debian/Ubuntu`）上，请注意：仅有`Debian`和`Ubuntu`运行效果最佳，其他平台有或多或少的问题。")
     platform = input("请输入platform的值：")
-    json_["platform"] = bool(platform)
+    if platform == "0":
+        platform = False
+    else:
+        platform = bool(platform)
+    json_["platform"] = platform
+    if platform:
+        abpath = __file__.replace("\\","/")[:-17] + "src/tools"
+    else:
+        abpath = __file__[:-17] + "src/tools"
+    json_["abpath"] = abpath
     space()
     print("模块`op`需要使用`owner`的值，这里请填写一个list（列表），列表内的值为`Bot`主人的QQ号。")
     print("不限数量，例如`[\"123456789\"]`或`[\"123456789\",\"234567890\"]都是可以的。`")
     owner = input("请输入owner的值：")
     owner = json.loads(owner)
+    permission = {}
+    for i in owner:
+        permission[i] = 10
     json_["owner"] = owner
     space()
-    print("模块`developer_tools`需要使用`cqhttp`的值，请输入`go-cqhttp`的`HTTP`服务器地址，例如`http://127.0.0.1:2334/`，注意末尾处的`/`是必要的。")
+    print("模块`developer_tools`需要使用`cqhttp`的值，请输入`go-cqhttp`的`HTTP`服务器地址，例如`http://127.0.0.1:2334`。")
     cqhttp = input("请输出cqhttp的值：")
+    if cqhttp[-1] != "/":
+        cqhttp = cqhttp + "/"
     json_["cqhttp"] = cqhttp
+    space()
+    print("模块`arcaea`使用了AUA（ArcaeaUnlimitedAPI），需要Token和API链接，请先输入API链接，格式为`https://xxx.xxx/botarcapi/`信息仅保存至本地，若有怀疑可检查源代码。")
+    print("同时请您也务必保管好个人信息。")
+    aua_api = input("请输入API地址：")
+    json_["aua_api"] = aua_api
+    space()
+    print("Token也是必要的，没有固定格式，请输入AUA开发者给予你的Token。")
+    aua_token = input("请输入Token：")
+    json_["aua_token"] = aua_token
     final = json.dumps(json_)
     write("config.json",final)
     space()
     def clear():
-        clean = input("是否需要重置ban和permission两个json文件(y/n)：")
+        clean = input("是否需要重置ban.json、nnl.json和permission三个json文件，若初次使用请填写y(y/n)：")
         if clean == "y":
             write("ban.json","[]")
-            write("permission.json","{}")
+            write("permission.json",json.dumps(permission))
+            write("nnl.json","[]")
             return
         elif clean == "n":
             return
@@ -53,4 +95,4 @@ if __name__ == "__main__":
             print("输出错误，请重试。")
             clear()
     clear()
-    
+    space()    

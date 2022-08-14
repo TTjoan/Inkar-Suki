@@ -9,6 +9,9 @@ __pycache__/
 # Distribution / packaging
 .Python
 build/
+assets/
+config.json
+cache/
 develop-eggs/
 dist/
 data/
@@ -38,6 +41,7 @@ MANIFEST
 pip-log.txt
 pip-delete-this-directory.txt
 ban.json
+nnl.json
 banword.json
 marry.json
 permission.json
@@ -107,7 +111,6 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
 .venv
 env/
 venv/
