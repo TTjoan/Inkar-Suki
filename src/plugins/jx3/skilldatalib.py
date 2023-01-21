@@ -1,13 +1,16 @@
-from urllib.error import HTTPError
 import nonebot
 import sys
 import os
 import json
+
+from urllib.error import HTTPError
 from nonebot.adapters.onebot.v11 import MessageSegment
 from pathlib import Path
+
 TOOLS = nonebot.get_driver().config.tools_path
 sys.path.append(TOOLS)
 ASSETS = TOOLS[:-5] + "assets"
+
 from utils import get_url, get_status, nodetemp, get_content, get_api
 from file import read, write
 from config import Config
@@ -21,13 +24,13 @@ def aliases(SkillName: str) -> str:
         return "离经易道"
     elif SkillName in ["傲雪","傲血","傲血战意"]:
         return "傲血战意"
-    elif SkillName in ["天策T","策T","铁牢","铁牢律"]:
+    elif SkillName in ["天策T","策T","铁牢","铁牢律","策t","天策t"]:
         return "铁牢律"
     elif SkillName in ["气纯","紫霞功","紫霞"]:
         return "紫霞功"
     elif SkillName in ["剑纯","太虚剑意"]:
         return "太虚剑意"
-    elif SkillName in ["奶秀","秀奶","云裳心经"]:
+    elif SkillName in ["奶秀","秀奶","云裳心经","云裳"]:
         return "云裳心经"
     elif SkillName in ["冰心","冰心诀","冰心决"]:
         return "冰心诀"
@@ -38,7 +41,7 @@ def aliases(SkillName: str) -> str:
     elif SkillName in ["惊羽诀","惊羽决","鲸鱼","惊羽"]:
         return "惊羽诀"
     elif SkillName in ["天罗诡道","田螺","天罗"]:
-        return "田螺"
+        return "天罗诡道"
     elif SkillName in ["问水诀","问水决","问水","轻剑"]:
         return "问水诀"
     elif SkillName in ["山居剑意","山居","重剑"]:
@@ -47,9 +50,9 @@ def aliases(SkillName: str) -> str:
         return "笑尘诀"
     elif SkillName in ["焚影圣诀","焚影圣决","焚影"]:
         return "焚影圣诀"
-    elif SkillName in ["明教T","喵T","明尊","明尊琉璃体"]:
+    elif SkillName in ["明教T","喵T","明尊","明尊琉璃体","明教t","明尊t","喵t"]:
         return "明尊琉璃体"
-    elif SkillName in ["苍云T","铁骨","铁骨衣"]:
+    elif SkillName in ["苍云T","铁骨","铁骨衣","铁骨1","苍t","苍云t"]:
         return "铁骨衣"
     elif SkillName in ["分山劲","分山"]:
         return "分山劲"
@@ -57,11 +60,11 @@ def aliases(SkillName: str) -> str:
         return "莫问"
     elif SkillName in ["奶歌","歌奶","相知"]:
         return "相知"
-    if SkillName in ["北傲决","北傲诀","霸刀","北傲"]:
+    elif SkillName in ["北傲决","北傲诀","霸刀","北傲"]:
         return "北傲诀"
     elif SkillName in ["蓬莱","凌海","凌海诀"]:
         return "凌海诀"
-    elif SkillName in ["洗髓经","洗髓","和尚T","秃T"]:
+    elif SkillName in ["洗髓经","洗髓","和尚T","秃T","和尚t","大师t","大师T"]:
         return "洗髓经"
     elif SkillName in ["易筋经","易筋"]:
         return "易筋经"
@@ -71,6 +74,8 @@ def aliases(SkillName: str) -> str:
         return "灵素"
     elif SkillName in ["无方"]:
         return "无方"
+    elif SkillName in ["刀宗","孤锋诀","孤锋"]:
+        return "孤锋诀"
     else:
         return False
 
@@ -80,15 +85,15 @@ async def getTalents():
 
     数据来源：`JX3BOX` & `JX3API`
     '''
-    force_list = await get_api("https://www.inkar-suki.xyz/api")
+    force_list = await get_api("https://www.inkar-suki.xyz/jx3boxdata")
     data_list = []
     for i in force_list:
         data_list.append(i)
     for i in data_list:
-        if await get_status(url=f"https://data.jx3box.com/bps/v1/{i}/talent.json") != 404:
-            info = await get_url(url = f"https://data.jx3box.com/bps/v1/{i}/talent.json")
+        if await get_status(url=f"https://data.jx3box.com/bps/std/{i}/talent.json") != 404:
+            info = await get_url(url = f"https://data.jx3box.com/bps/std/{i}/talent.json")
             data = json.loads(info)
-            for a in data["data"]:
+            for a in data:
                 write(ASSETS + "/jx3/talents/" + a["kungfu"] + ".json", json.dumps(a,ensure_ascii=False))
 
 async def getSkills():
@@ -102,10 +107,10 @@ async def getSkills():
     for i in force_list:
         data_list.append(i)
     for i in data_list:
-        if await get_status(url=f"https://data.jx3box.com/bps/v1/{i}/skill.json") != 404:
-            info = await get_url(url = f"https://data.jx3box.com/bps/v1/{i}/skill.json")
+        if await get_status(url=f"https://data.jx3box.com/bps/std/{i}/skill.json") != 404:
+            info = await get_url(url = f"https://data.jx3box.com/bps/std/{i}/skill.json")
             data = json.loads(info)
-            for a in data["data"]:
+            for a in data:
                 write(ASSETS + "/jx3/skills/" + a["kungfuName"] + ".json", json.dumps(a,ensure_ascii=False))
 
 async def get_icon(skillName: str, type_: str, api_icon: str = None, kungfu: str = None) -> str:

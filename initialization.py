@@ -1,14 +1,25 @@
-import os, json
+import os
+import json
+
 def space():
     print("----------------------分割线----------------------")
+
 try:
     os.mkdir("./src/data")
 except FileExistsError:
     print("检测到`data`文件夹已创建。")
+
 try:
     os.mkdir("./src/cache")
 except FileExistsError:
     print("检测到`cache`文件夹已创建。")
+
+try:
+    os.mkdir("./src/sign")
+
+except FileExistsError:
+    print("检测到`sign`文件夹已创建。")
+
 try:
     os.mkdir("./src/assets")
     os.mkdir("./src/assets/arcaea")
@@ -18,15 +29,22 @@ try:
     os.mkdir("./src/assets/jx3")
     os.mkdir("./src/assets/jx3/skills")
     os.mkdir("./src/assets/jx3/icons")
-    os.mkdir("./src/assets/jx3/maps")
     os.mkdir("./src/assets/jx3/achievement")
     os.mkdir("./src/assets/jx3/talents")
+    os.mkdir("./src/assets/jx3/adventure")
 except FileExistsError:
     print("检测到`assets`文件夹已创建，已自动补全所有需要的文件夹。")
+
 def write(file, something):
     with open(f"./src/tools/{file}",mode="w") as cache:
         cache.write(something)
+
+def write_(file, something):
+    with open(f"./src/sign/{file}",mode="w") as cache:
+        cache.write(something)        
+
 json_ = {}
+
 if __name__ == "__main__":
     print("模块`github`需要使用`web_path`，如果您填写的值为`/a`，那么通过`http://127.0.0.1:2333/a`可传入Webhook，但内网显然不行，因此您需要手动配置Nginx或Apache2进行反向代理，代理地址为`http://127.0.0.1:2333/a`。")
     print("此处提供Nginx配置文件写法（当填入值为`/a`时：）")
@@ -79,15 +97,83 @@ if __name__ == "__main__":
     print("Token也是必要的，没有固定格式，请输入AUA开发者给予你的Token。")
     aua_token = input("请输入Token：")
     json_["aua_token"] = aua_token
+    space()
+    print("是否需要使用代理服务器？放心，这仅会在作者认为需要代理服务器的代码中生效，请自行配置代理服务器，不要设置账号密码，可以设置仅某IP可用。")
+    proxy = input("请输入代理服务器，不需要则请直接回车（需要协议头和端口）：")
+    if proxy == "":
+        json_["proxy"] = None
+    else:
+        json_["proxy"] = proxy
+    space()
+    print("模块`jx3`需要使用JX3API的Socket API，请查询`https://www.jx3api.com`，获取`Socket API`地址并填写。")
+    print("格式为：`wss://xxxx.xxxx.xxx`")
+    jx3api_wslink = input("请输入JX3API的Socket API地址：")
+    json_["jx3api_wslink"] = jx3api_wslink
+    space()
+    print("Websocket Token并非必要（若只需要新闻和开服推送），但推荐填写，需要在`https://pay.jx3api.com`购买。")
+    print("如果您没有Token，请直接回车：")
+    jx3api_wstoken = input("请输入Token：")
+    if jx3api_wstoken == "":
+        json_["jx3api_wstoken"] = None
+    else:
+        json_["jx3api_wstoken"] = jx3api_wstoken
+    space()
+    print("如果您有JX3API的通用Token，可以填写在下方，填写之后不需要再填写。")
+    print("需要在`https://pay.jx3api.com`购买，若没有请直接回车。")
+    jx3api_globaltoken = input("请输入通用Token：")
+    moreApiTokenRequiredFlag = False
+    json_["jx3api_globaltoken"] = ""
+    if jx3api_globaltoken == "":
+        moreApiTokenRequiredFlag = True
+        json_["jx3api_globaltoken"] = None
+    else:
+        json_["jx3api_globaltoken"] = jx3api_globaltoken
+    if moreApiTokenRequiredFlag:
+        space()
+        print("请输入团队招募API的Token，若没有请直接回车。")
+        json_["jx3api_recruittoken"] = ""
+        recruit = input("请输入Token：")
+        if recruit == "":
+            json_["jx3api_recruittoken"] = None
+        else:
+            json_["jx3api_recruittoken"] = recruit
+    space()
+    print("请输入用于申请机器人使用的GitHub Personal Token，若没有请直接回车。")
+    json_["githubtoken"] = ""
+    ght = input("请输入GitHub Personal Access Token：")
+    if ght == "":
+        json_["githubtoken"] = None
+    else:
+        json_["githubtoken"] = ght
+    space()
+    print("请输入推栏Token，若没有请直接回车（抓包即可获得）。")
+    jx3t = input("请输入推栏Ticket/Token：")
+    if jx3t == "":
+        json_["jx3_token"] = None
+    else:
+        json_["jx3_token"] = jx3t
+    space()
+    print("请输入推栏deviceId，若没有请直接回车（抓包即可获得）。")
+    jx3d = input("请输入deviceId：")
+    if jx3d == "":
+        json_["jx3_deviceId"] = None
+    else:
+        json_["jx3_deviceId"] = jx3d
     final = json.dumps(json_)
     write("config.json",final)
     space()
     def clear():
-        clean = input("是否需要重置ban.json、nnl.json和permission三个json文件，若初次使用请填写y(y/n)：")
+        clean = input("是否需要重置各数据文件？若初次使用请填写y(y/n)：")
         if clean == "y":
             write("ban.json","[]")
             write("permission.json",json.dumps(permission))
             write("nnl.json","[]")
+            write("subscribe.json","[]")
+            write("token.json","[]")
+            write("blacklist.json","[]")
+            write("agl.json","[]")
+            write_("signed.json","[]")
+            write_("accounts.json","[]")
             return
         elif clean == "n":
             return
@@ -95,4 +181,4 @@ if __name__ == "__main__":
             print("输出错误，请重试。")
             clear()
     clear()
-    space()    
+    space()

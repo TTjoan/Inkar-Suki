@@ -14,7 +14,7 @@ CACHE = TOOLS[:-5] + "cache"
 PLUGINS = TOOLS[:-5] + "plugins"
 from file import read, write
 from config import Config
-from gender import gender, get_uuid
+from generate import generate, get_uuid
 
 help = on_command("help", aliases={"帮助"}, priority=5)
 css = """
@@ -75,12 +75,12 @@ async def help_(args: Message = CommandArg()):
             html = "<div style=\"font-family:Custom\">" + msg.replace("$", "<br>") + "</div>"+css
             final_path = CACHE + "/" + get_uuid() + ".html"
             write(final_path,html)
-            image = gender(final_path,0.1,"1500x400",False)
+            image = generate(final_path,0.1,"1400x800",False)
             if type(image) != type("sb"):
                 await help.finish("唔，帮助文件生成失败了哦~请联系机器人管理员解决此问题，附带以下信息：\n"+image)
             else:
                 picture_message = ms.image(Path(image).as_uri())
-                await help.finish("查询到插件"+module+"的帮助文件啦~\n"+picture_message+"还有文档可以找哦~\nhttps://www.inkar-suki.xyz")
+                await help.finish("查询到插件"+module+"的帮助文件啦~\n"+picture_message+"还有文档可以找哦~\nhttps://inkar-suki.codethink.cn\n如果你觉得有帮助的话，欢迎来给作者赞助哦~\n链接：https://inkar-suki.codethink.cn/donate.html")
     else:
         final_plugin_information_file_path = {}
         name = {}
@@ -112,9 +112,9 @@ async def help_(args: Message = CommandArg()):
         html = "<div style=\"font-family:Custom\">" + msg.replace("$", "<br>") + "</div>"+css
         final_path = CACHE + "/" + get_uuid() + ".html"
         write(final_path,html)
-        image = gender(final_path,0.1,read(Config.size),False)
+        image = generate(final_path,0.1,read(Config.size),False)
         if type(image) != type("sb"):
             await help.finish("唔，帮助文件生成失败了哦~请联系机器人管理员解决此问题，附带以下信息：\n"+image)
         else:
             picture_message = ms.image(Path(image).as_uri())
-            await help.finish("帮助信息来啦！输入+help <module>可快速定位你要查找的模块哦~\n"+picture_message+"还有文档可以找哦~\nhttps://www.inkar-suki.xyz")
+            await help.finish("帮助信息来啦！输入+help <module>可快速定位你要查找的模块哦~\n"+picture_message+"还有文档可以找哦~\nhttps://inkar-suki.codethink.cn/\n如果你觉得有帮助的话，欢迎来给作者赞助哦~\n链接：https://inkar-suki.codethink.cn/donate.html")

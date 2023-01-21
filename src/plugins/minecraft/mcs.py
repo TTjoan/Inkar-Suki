@@ -53,9 +53,9 @@ async def bes(ip: str) -> str:
     try:
         error = infomation["message"]
         if error.find("getaddrinfo ENOTFOUND") != -1:
-            return "唔……获取信息失败：DNS出错，域名尚未绑定该IP地址。"
+            return "唔……域名解析失败。"
         else:
-            return "唔……获取信息失败：未知错误。"
+            return "唔……未知错误。"
     except:
         unpack_data = infomation["data"].split(";")
         motd_1 = clean(unpack_data[1])

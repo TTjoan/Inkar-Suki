@@ -15,12 +15,12 @@ from file import read
 from utils import get_api, convert_time, get_content
 
 api = Config.auaurl
-token = Config.auatok
-headers = {"User-Agent":token}
+token = "Bearer " + Config.auatok
+headers = {"Authorization": token}
 difficulties = ["Past","Present","Future","Beyond"]
 clear_statuses = ["Track Lost","Track Complete","Full Recall","Pure Memory","Easy Complete","Hard Complete"]
 
-def judgeLevelByScore(score: int): # 来自Arcaea的评分标准
+def judgeLevelByScore(score: int): # 来自Arcaea的评分标准 @OasisAkari
     '''
     使用分数进行等级判定。 @OasisAkari
     '''
@@ -82,6 +82,7 @@ async def judgeWhetherPlayer(usercode: int=None, nickname: str=None):
         info = await get_api(api + f"user/info?user={nickname}&withsonginfo=true",headers=headers)
     elif usercode:
         info = await get_api(api + f"user/info?usercode={usercode}&withsonginfo=true",headers=headers)
+    data = info
     if data["status"] == 0:
         name = data["content"]["account_info"]["name"]
         code = data["content"]["account_info"]["code"]

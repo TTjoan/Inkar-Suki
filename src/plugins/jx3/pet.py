@@ -1,13 +1,12 @@
 import sys
 import nonebot
-from pathlib import Path
-from nonebot.adapters.onebot.v11 import MessageSegment
-from bs4 import BeautifulSoup
+import re
+
 TOOLS = nonebot.get_driver().config.tools_path
 sys.path.append(TOOLS)
 ASSETS = TOOLS[:-5] + "assets"
 PLUGINS = TOOLS[:-5] + "plugins"
-from utils import get_api, get_content, get_status, checknumber
+from utils import get_api
 
 '''
 状态码：
@@ -31,7 +30,9 @@ async def get_pet(pet: str):
         url = []
         clue.append(data["OutputDes"].split("=")[1][1:].split("font")[0].replace("\" ",""))
         result.append(data["Name"])
-        desc.append(data["Desc"].split("=")[1][1:].split("font")[0].replace("\" ",""))
+        desc_ = data["Desc"].split("=")[1][1:].split("font")[0].replace("\" ","")
+        info = re.sub(r"\\.*" , "", desc_)
+        desc.append(info)
         url.append(basic + str(data["Index"]))
         return {"status":201, "result": result, "clue": clue, "desc": desc, "url": url}
     elif count >= 6:

@@ -23,6 +23,7 @@ lib64/
 parts/
 sdist/
 var/
+chenshan/
 wheels/
 pip-wheel-metadata/
 share/python-wheels/
@@ -37,13 +38,20 @@ MANIFEST
 *.manifest
 *.spec
 
+agl.json
+blacklist.json
+password.txt
 # Installer logs
 pip-log.txt
 pip-delete-this-directory.txt
 ban.json
 nnl.json
+token.json
+account.json
+signed.json
 banword.json
 marry.json
+subscribe.json
 permission.json
 webhook.json
 # Unit test / coverage reports

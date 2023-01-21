@@ -2,15 +2,18 @@ import json
 import sys
 import nonebot
 import os
+
 from nonebot import get_bot, on_command
 from nonebot.adapters import Message
 from nonebot.adapters.onebot.v11 import Bot, GroupMessageEvent
 from nonebot.adapters.onebot.v11 import MessageSegment as ms
 from nonebot.log import logger
 from nonebot.params import CommandArg
+
 TOOLS = nonebot.get_driver().config.tools_path
 DATA = TOOLS[:-5] + "data"
 sys.path.append(str(TOOLS))
+
 from permission import checker, error
 from utils import get_status
 from file import read
@@ -83,31 +86,24 @@ async def recWebHook(req: Request):
     body = await req.json()
     repo = body["repository"]["full_name"]
     event = req.headers.get("X-GitHub-Event")
-    # try:
-    message = "[GitHub] " + getattr(main,event)(body)
-    message = message.replace("codethink-cn","CodeThink-CN")
-    # except Exception as e:
-    # msg = f"Event {event} has not been supported."
-    # return {"status":"500","message":msg, "error":e}
+    try:
+        message = "[GitHub] " + getattr(main,event)(body)
+        message = message.replace("codethink-cn","CodeThink-CN")
+    except Exception as e:
+        msg = f"Event {event} has not been supported."
+        return {"status":"500","message":msg, "error":e}
     bots: list = Config.bot
     for i in bots:
         bot = get_bot(i)
         await sendm(bot, message, repo)
     return {"status":200}
 
-async def sendm(bot: Bot, message, repo):
-    groups=os.listdir("./src/data")
+async def sendm(bot, message, repo):
+    groups = os.listdir("./src/data")
     send_group = []
     for i in groups:
-        if repo in json.loads(read(DATA+"/"+i+"/webhook.json")):
+        if repo in json.loads(read(DATA + "/" + i + "/webhook.json")):
             send_group.append(int(i))
     for i in send_group:
-        try:
-            response = await bot.call_api("send_group_msg", group_id=int(i), message=message)
-            logger.info("Webhook推送成功：消息ID为"+str(response["message_id"]))
-        except:
-            try:
-                response = await bot.call_api("send_group_msg", group_id=int(group), message="唔……刚刚发送消息失败了哦（原因懂的都懂），重新发送：\n"+message)
-                logger.info("Webhook推送失败：被风控，重新发送消息ID为"+response["message_id"])
-            except:
-                logger.info("Webhook推送失败：被风控，重新发送失败。")
+        response = await bot.call_api("send_group_msg", group_id=int(i), message=message)
+        logger.info("Webhook推送成功：消息ID为"+str(response["message_id"]))

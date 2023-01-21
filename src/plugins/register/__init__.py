@@ -2,14 +2,16 @@ import json
 import sys
 import nonebot
 import os
+
 from nonebot import on_command, on_message
 from nonebot.adapters.onebot.v11 import Event, Bot, GroupMessageEvent
 from nonebot.matcher import Matcher
-from nonebot.params import CommandArg
 from nonebot.log import logger
+
 TOOLS = nonebot.get_driver().config.tools_path
 sys.path.append(str(TOOLS))
 DATA = TOOLS[:-5] + "data"
+
 from permission import checker, error
 from file import read, write
 from config import Config
@@ -36,6 +38,7 @@ async def _(event: GroupMessageEvent):
     else:
         new_path = "./src/data/" + group
         os.mkdir(new_path)
+        write(new_path + "/jx3group.json","{\"group\":\"" + str(event.group_id) + "\",\"server\":\"\",\"leader\":\"\",\"leaders\":[],\"name\":\"\",\"status\":false}")
         write(new_path + "/webhook.json","[]")
         write(new_path + "/marry.json","[]")
         write(new_path + "/welcome.txt","欢迎入群！")
@@ -44,7 +47,6 @@ async def _(event: GroupMessageEvent):
         write(new_path + "/wiki.json","{\"startwiki\":\"\",\"interwiki\":[]}")
         write(new_path + "/arcaea.json","{}")
         write(new_path + "/record.json","[]")
-        write(new_path + "/jx3group.json","{}")
         await register.finish("注册成功！")
 
 flushdata = on_command("flushdata",priority=5)
@@ -63,6 +65,7 @@ async def _(event: Event):
             disabled_groups.append(i)
     for i in disabled_groups:
         try:
+            os.remove(DATA + "/" + i + "/jx3group.json")
             os.remove(DATA + "/" + i + "/webhook.json")
             os.remove(DATA + "/" + i + "/marry.json")
             os.remove(DATA + "/" + i + "/welcome.txt")
@@ -71,12 +74,16 @@ async def _(event: Event):
             os.remove(DATA + "/" + i + "/opening.json")
             os.remove(DATA + "/" + i + "/arcaea.json")
             os.remove(DATA + "/" + i + "/record.json")
-            os.remove(DATA + "/" + i + "/jx3group.json")
             nnl = json.loads(read(TOOLS + "/nnl.json"))
             for a in nnl:
                 if a == i:
                     nnl.remove(a)
-            write(TOOLS + "/nnl.json",nnl)
+            subscribe = json.loads(read(TOOLS + "/subscribe.json"))
+            for a in subscribe:
+                if a == i:
+                    subscribe.remove(a)
+            write(TOOLS + "/nnl.json", nnl)
+            write(TOOLS + "/subscribe.json", subscribe)
             os.rmdir(DATA + "/"+i)
         except:
             logger.info("删除文件夹" + i + "失败，未知错误。")
@@ -92,6 +99,7 @@ async def _(bot: Bot, event: GroupMessageEvent):
     group = str(event.group_id)
     if group in groups:
         try:
+            os.remove(DATA + "/" + group + "/jx3group.json")
             os.remove(DATA + "/" + group + "/webhook.json")
             os.remove(DATA + "/" + group + "/marry.json")
             os.remove(DATA + "/" + group + "/welcome.txt")
@@ -99,13 +107,17 @@ async def _(bot: Bot, event: GroupMessageEvent):
             os.remove(DATA + "/" + group + "/record.json")
             os.remove(DATA + "/" + group + "/wiki.json")
             os.remove(DATA + "/" + group + "/opening.json")
-            os.remove(DATA + "/" + group + "/jx3group.json")
             os.remove(DATA + "/" + group + "/arcaea.json")
             nnl = json.loads(read(TOOLS + "/nnl.json"))
             for a in nnl:
                 if a == group:
                     nnl.remove(a)
-            write(TOOLS + "/nnl.json",nnl)
+            subscribe = json.loads(read(TOOLS + "/subscribe.json"))
+            for a in subscribe:
+                if a == group:
+                    subscribe.remove(a)
+            write(TOOLS + "/nnl.json", nnl)
+            write(TOOLS + "/subscribe.json", subscribe)
             os.rmdir(DATA + "/" + group)
         except:
             logger.info("删除文件夹"+group+"失败，未知错误。")
@@ -115,12 +127,13 @@ async def _(bot: Bot, event: GroupMessageEvent):
 cleardata = on_command("cleardata",priority=5)
 @cleardata.handle()
 async def _(event: GroupMessageEvent):
-    if checker(str(event.user_id),9):
+    if checker(str(event.user_id),9) == False:
         await cleardata.finish(error(9))
     groups = os.listdir(DATA)
     group = str(event.group_id)
     if group in groups:
         try:
+            os.remove(DATA + "/" + group + "/jx3group.json")
             os.remove(DATA + "/" + group + "/webhook.json")
             os.remove(DATA + "/" + group + "/marry.json")
             os.remove(DATA + "/" + group + "/welcome.txt")
@@ -129,12 +142,16 @@ async def _(event: GroupMessageEvent):
             os.remove(DATA + "/" + group + "/record.json")
             os.remove(DATA + "/" + group + "/wiki.json")
             os.remove(DATA + "/" + group + "/arcaea.json")
-            os.remove(DATA + "/" + group + "/jx3group.json")
             nnl = json.loads(read(TOOLS + "/nnl.json"))
             for a in nnl:
                 if a == group:
                     nnl.remove(a)
-            write(TOOLS + "/nnl.json",nnl)
+            subscribe = json.loads(read(TOOLS + "/subscribe.json"))
+            for a in subscribe:
+                if a == group:
+                    subscribe.remove(a)
+            write(TOOLS + "/nnl.json", nnl)
+            write(TOOLS + "/subscribe.json", subscribe)
             os.rmdir(DATA + "/" + group)
         except:
             logger.info("删除文件夹"+group+"失败，未知错误。")
@@ -143,11 +160,12 @@ async def _(event: GroupMessageEvent):
 clear = on_command("clear",priority=5)
 @clear.handle()
 async def _(event: GroupMessageEvent):
-    if checker(str(event.user_id),10):
+    if checker(str(event.user_id),10) == False:
         await clear.finish(error(10))
     groups = os.listdir(DATA)
     for i in groups:
         try:
+            os.remove(DATA + "/" + i + "/jx3group.json")
             os.remove(DATA + "/" + i + "/webhook.json")
             os.remove(DATA + "/" + i + "/marry.json")
             os.remove(DATA + "/" + i + "/welcome.txt")
@@ -156,12 +174,16 @@ async def _(event: GroupMessageEvent):
             os.remove(DATA + "/" + i + "/wiki.json")
             os.remove(DATA + "/" + i + "/opening.json")
             os.remove(DATA + "/" + i + "/arcaea.json")
-            os.remove(DATA + "/" + i + "/jx3group.json")
             nnl = json.loads(read(TOOLS + "/nnl.json"))
             for a in nnl:
                 if a == i:
                     nnl.remove(a)
+            subscribe = json.loads(read(TOOLS + "/subscribe.json"))
+            for a in subscribe:
+                if a == i:
+                    subscribe.remove(a)
             write(TOOLS + "/nnl.json",nnl)
+            write(TOOLS + "/subscribe.json", subscribe)
             os.rmdir(DATA + "/" + i)
         except:
             logger.info("删除文件夹" + i + "失败，未知错误。")
@@ -173,8 +195,8 @@ fix = on_command("fix",priority=5)
 async def _(event: GroupMessageEvent):
     files = os.listdir(DATA + "/" + str(event.group_id))
     missing = []
-    right = ["webhook.json","marry.json","welcome.txt","banword.json","wiki.json","arcaea.json","opening.json","record.json"]
-    fix_data = {"webhook.json":"[]","marry.json":"[]","welcome.txt":"欢迎入群！","banword.json":"[]","wiki.json":"{\"startwiki\":\"\",\"interwiki\":[]}","arcaea.json":"{}","opening.json":"[]","record.json":"[]"}
+    right = ["webhook.json","marry.json","welcome.txt","banword.json","wiki.json","arcaea.json","opening.json","record.json","jx3group.json"]
+    fix_data = {"webhook.json":"[]","marry.json":"[]","welcome.txt":"欢迎入群！","banword.json":"[]","wiki.json":"{\"startwiki\":\"\",\"interwiki\":[]}","arcaea.json":"{}","opening.json":"[]","record.json":"[]","jx3group.json":"{\"group\":\"" + str(event.group_id) + "\",\"server\":\"\",\"leader\":\"\",\"leaders\":[],\"name\":\"\",\"status\":false}"}
     for i in right:
         if i not in files:
             missing.append(i)

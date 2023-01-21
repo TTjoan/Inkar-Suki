@@ -22,5 +22,12 @@ class Config:
     welcome_file = global_path+"/tools/welcome.txt"
     version = ikv
     nonebot = nbv
+    proxy = configs["proxy"]
     auaurl = configs["aua_api"]
     auatok = configs["aua_token"]
+    jx3api_wslink = configs["jx3api_wslink"]
+    jx3api_wstoken = configs["jx3api_wstoken"]
+    jx3api_globaltoken = configs["jx3api_globaltoken"]
+    ght = configs["githubtoken"]
+    jx3_token = configs["jx3_token"]
+    jx3_deviceId = configs["jx3_deviceId"]
