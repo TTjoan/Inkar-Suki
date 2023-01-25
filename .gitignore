@@ -11,6 +11,7 @@ __pycache__/
 build/
 assets/
 config.json
+!src/liteyuki_api/config.json
 cache/
 develop-eggs/
 dist/
